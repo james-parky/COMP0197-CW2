@@ -1,0 +1,15 @@
+repos:
+    - repo: https://github.com/psf/black
+      rev: 23.12.1
+      hooks:
+        - id: black
+
+    - repo: local
+      hooks:
+          - id: pylint
+            name: pylint
+            entry: pylint
+            language: system
+            types: [python]
+            require_serial: true
+            files: ^src/
