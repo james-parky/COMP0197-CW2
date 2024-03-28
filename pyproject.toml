@@ -1,0 +1,11 @@
+[project]
+authors = [
+  {name = "James Parkington"},
+]
+description = "A repository for code related to the COMP0197 self-supervised learning group coursework."
+readme = "README.md"
+dynamic = ["dependencies"]
+name = "comp0197-cw2"
+
+[tool.black]
+line-length = 80
