@@ -11,6 +11,7 @@ The required development dependencies can be found in `dev-requirements.txt`.
 This repository uses the `pre-commit` library to enable pre-commit hooks within the project. These hooks allow for various code content and quality checks to be completed when you run `git commit`, ensuring than no un-linted and un-formatted code is persisted to the remote repository. There are two hooks set up:
 - Black (formatter)
 - Pylint (linter)
+
 You only need to set up `pre-commit` **once** when you clone this repo, by running:
 ```bash
 pre-commit install
