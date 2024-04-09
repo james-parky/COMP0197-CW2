@@ -5,4 +5,5 @@ disable=
     too-many-arguments,
     too-many-branches,
     too-many-nested-blocks,
-    too-many-instance-attributes
+    too-many-instance-attributes,
+    too-many-locals
