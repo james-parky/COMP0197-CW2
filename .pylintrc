@@ -4,5 +4,5 @@ disable=
     fixme,
     too-many-arguments,
     too-many-branches,
-    too-many-nested-blocks
+    too-many-nested-blocks,
     too-many-instance-attributes
