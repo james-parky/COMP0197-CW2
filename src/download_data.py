@@ -121,9 +121,9 @@ def split_data(ratio_train: float, ratio_val: float, ratio_test: float) -> None:
             ).reshape(im_size[0], im_size[1])
             seg_h5s[ids].create_dataset(f"{idx:06d}", data=seg)
 
-    for _, ids in enumerate(img_h5s):
-        img_h5s[ids].flush()
-        img_h5s[ids].close()
+    for ids, _ in enumerate(img_h5s):
+        _.flush()
+        _.close()
         seg_h5s[ids].flush()
         seg_h5s[ids].close()
 
