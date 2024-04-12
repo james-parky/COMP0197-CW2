@@ -5,7 +5,7 @@ import random
 from typing import Iterator, Optional, Tuple
 import numpy as np
 import h5py
-
+import torch
 
 GRAYSCALE_VECTOR = [0.2989, 0.5870, 0.1140]
 
@@ -21,7 +21,7 @@ class H5ImageLoader:
         img_file: str,
         batch_size: int,
         seg_file: Optional[str] = None,
-        is_grayscale: bool = True,
+        is_grayscale: bool = False,
     ) -> None:
         """
         Initialiser for the class.
@@ -49,6 +49,9 @@ class H5ImageLoader:
         self.img_ids = list(range(len(self.img_h5)))
         self.is_grayscale = is_grayscale
         self.batch_idx = 0
+
+    def __len__(self):
+        return len(self.dataset_list * self.batch_size)
 
     @staticmethod
     def rgb_to_grayscale(image: np.ndarray) -> np.ndarray:
@@ -101,11 +104,18 @@ class H5ImageLoader:
             raise StopIteration
 
         images = [self.img_h5[ds][()] for ds in datasets]
-        if self.is_grayscale:
-            images = list(map(self.rgb_to_grayscale, images))
         labels = (
             None
             if (self.seg_h5 is None)
             else [self.seg_h5[ds][()] == 1 for ds in datasets]
         )  # foreground only
+        images = [
+            torch.from_numpy(self.img_h5[ds][()]).float() for ds in datasets
+        ]
+        labels = (
+            None
+            if self.seg_h5 is None
+            else [torch.from_numpy(self.seg_h5[ds][()]) == 1 for ds in datasets]
+        )
+        # print(images, labels)
         return images, labels
