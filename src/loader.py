@@ -22,6 +22,7 @@ class H5ImageLoader:
         batch_size: int,
         seg_file: Optional[str] = None,
         is_grayscale: bool = False,
+        transform=None,
     ) -> None:
         """
         Initialiser for the class.
@@ -49,6 +50,7 @@ class H5ImageLoader:
         self.img_ids = list(range(len(self.img_h5)))
         self.is_grayscale = is_grayscale
         self.batch_idx = 0
+        self.transform = transform
 
     def __len__(self):
         return len(self.dataset_list * self.batch_size)
@@ -103,12 +105,6 @@ class H5ImageLoader:
         if self.batch_idx >= self.num_batches:
             raise StopIteration
 
-        images = [self.img_h5[ds][()] for ds in datasets]
-        labels = (
-            None
-            if (self.seg_h5 is None)
-            else [self.seg_h5[ds][()] == 1 for ds in datasets]
-        )  # foreground only
         images = [
             torch.from_numpy(self.img_h5[ds][()]).float() for ds in datasets
         ]
@@ -117,5 +113,18 @@ class H5ImageLoader:
             if self.seg_h5 is None
             else [torch.from_numpy(self.seg_h5[ds][()]) == 1 for ds in datasets]
         )
+        if self.transform:
+            # aug = [self.transform(image=img)['image'] for img in images]
+            # images = aug
+            t_images = []
+            t_segs = []
+            for img, seg in zip(images, labels):
+                transformed = self.transform(
+                    image=np.array(img), mask=np.array(seg)
+                )
+                t_images.append(torch.from_numpy(transformed["image"]))
+                t_segs.append(torch.from_numpy(transformed["mask"]))
+            images = t_images
+            labels = t_segs
         # print(images, labels)
         return images, labels

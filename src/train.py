@@ -4,6 +4,7 @@ Module to train an image segmenation, based on Yipengs tutorial code.
 from typing import Tuple
 import os
 import torch
+import albumentations as A
 from net import ResUNet
 from loader import H5ImageLoader
 from download_data import DATA_PATH
@@ -15,6 +16,21 @@ NUM_EPOCHS = 5
 FREQ_INFO = 1
 FREQ_SAVE = 100
 SAVE_PATH = "results-pt"
+
+
+transform = A.Compose(
+    [
+        A.ChromaticAberration(
+            mode="red_blue",
+            primary_distortion_limit=0.5,
+            secondary_distortion_limit=0.1,
+            p=1,
+        ),
+        A.RandomCrop(width=50, height=50),
+        A.HorizontalFlip(p=0.5),
+        A.RandomBrightnessContrast(p=0.2),
+    ]
+)
 
 
 def dice_score(ps: torch.Tensor, ts: torch.Tensor, eps: float = 1e-6) -> float:
@@ -75,7 +91,7 @@ def train_model(loader: H5ImageLoader) -> None:
         for images, labels in loader:
             images, labels = pre_process(images, labels)
             predicts = seg_net(images)
-            loss = torch.mean(-dice_score(predicts, labels))
+            loss = torch.mean(1 - dice_score(predicts, labels))
             optimiser.zero_grad()
             loss.backward()
             running_loss += loss.item()
@@ -93,5 +109,6 @@ if __name__ == "__main__":
         f"{DATA_PATH}/images_train.h5",
         MINIBATCH_SIZE,
         f"{DATA_PATH}/labels_train.h5",
+        transform=transform,
     )
     train_model(loader_train)
