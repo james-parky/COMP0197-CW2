@@ -1,3 +1,9 @@
+# Data folders
+data/
+
+# Saved model parameters
+*.pt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
