@@ -4,6 +4,10 @@ from torchvision.datasets import CIFAR10
 from torchvision.transforms import transforms
 from transformers import ViTMAEForPreTraining, ViTMAEConfig
 
+"""
+Defines a pretraining loop for the ViTMAE model on the CIFAR-10 dataset.
+"""
+
 # Define the ViTMAE configuration
 config = ViTMAEConfig(
     image_size=32,
@@ -36,15 +40,15 @@ pretraining_dataloader = DataLoader(pretraining_dataset, batch_size=128, shuffle
 optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
 
 # Pretraining loop
-num_epochs = 100
+NUM_EPOCHS = 100
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(torch.cuda.is_available())
 model.to(device)
 
-total_steps = len(pretraining_dataloader) * num_epochs
-current_step = 0
+total_steps = len(pretraining_dataloader) * NUM_EPOCHS
+CURRENT_STEP = 0
 
-for epoch in range(num_epochs):
+for epoch in range(NUM_EPOCHS):
     model.train()
     for batch_idx, batch in enumerate(pretraining_dataloader):
         images, _ = batch  # Ignore the labels during pretraining
@@ -55,17 +59,17 @@ for epoch in range(num_epochs):
         optimizer.step()
         optimizer.zero_grad()
 
-        current_step += 1
+        CURRENT_STEP += 1
         if (batch_idx + 1) % 100 == 0:
-            print(f"Epoch [{epoch+1}/{num_epochs}] Batch [{batch_idx+1}/{len(pretraining_dataloader)}] Loss: {loss.item():.4f}")
-        
-        if current_step % 1000 == 0:
-            progress = (current_step / total_steps) * 100
+            print(f"Epoch [{epoch+1}/{NUM_EPOCHS}] Batch [{batch_idx+1}/{len(pretraining_dataloader)}] 
+                  Loss: {loss.item():.4f}")        
+        if CURRENT_STEP % 1000 == 0:
+            progress = (CURRENT_STEP / total_steps) * 100
             print(f"Progress: {progress:.2f}%")
 
-    print(f"Epoch [{epoch+1}/{num_epochs}] Loss: {loss.item():.4f}")
+    print(f"Epoch [{epoch+1}/{NUM_EPOCHS}] Loss: {loss.item():.4f}")
 
 # Save the pretrained model
-pretrained_model_path = "./pretrained_model.pth"
-torch.save(model.state_dict(), pretrained_model_path)
+PRETRAINED_MODEL_PATH = "./pretrained_model.pth"
+torch.save(model.state_dict(), PRETRAINED_MODEL_PATH)
 print("Pretraining completed. Model saved.")
