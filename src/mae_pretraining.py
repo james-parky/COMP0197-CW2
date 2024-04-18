@@ -61,8 +61,7 @@ for epoch in range(NUM_EPOCHS):
 
         CURRENT_STEP += 1
         if (batch_idx + 1) % 100 == 0:
-            print(f"Epoch [{epoch+1}/{NUM_EPOCHS}] Batch [{batch_idx+1}/{len(pretraining_dataloader)}] 
-                  Loss: {loss.item():.4f}")        
+            print(f"Epoch [{epoch+1}/{NUM_EPOCHS}] Batch [{batch_idx+1}/{len(pretraining_dataloader)}] Loss: {loss.item():.4f}")        
         if CURRENT_STEP % 1000 == 0:
             progress = (CURRENT_STEP / total_steps) * 100
             print(f"Progress: {progress:.2f}%")
