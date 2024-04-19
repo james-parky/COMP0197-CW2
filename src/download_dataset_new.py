@@ -5,7 +5,7 @@ import gdown  # pylint: disable=import-error
 
 
 TRAINING_DATASET_FILE_ID = "14B78jkv9L-6UJheRbHgCDyysq5v4GF3Q"
-TRAINING_DATASET_PATH_ZIP = "./training_dataset_zip"
+TRAINING_DATASET_PATH_ZIP = "./training_dataset.zip"
 CAT_DATASET_PATH = "./training_dataset"
 
 

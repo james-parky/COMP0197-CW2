@@ -4,6 +4,7 @@ Module to create the new dataset.
 import os
 import random
 import shutil
+from typing import Tuple
 from torch.utils.data import Dataset, DataLoader  # pylint: disable=import-error
 from PIL import Image
 from torchvision import transforms  # pylint: disable=import-error
@@ -11,7 +12,7 @@ from torchvision import transforms  # pylint: disable=import-error
 # Specify the source folders and destination folder
 SOURCE_FOLDER_1 = "./cats_filtered"
 SOURCE_FOLDER_2 = "./dogs_filtered"
-DESTINATION_FOLDER = "./training_dataset"
+DESTINATION_FOLDER = "./training_dataset/training_dataset"
 
 
 class ImageDataset(Dataset):
@@ -174,29 +175,50 @@ def count_files(folder_path):
     return file_count
 
 
-if __name__ == "__main__":
-    # Sub-sample images from the source folders
-    subsample_images(SOURCE_FOLDER_1)
-    subsample_images(SOURCE_FOLDER_2)
+class UnsupervisedLoader:
+    """
+    Create a dataloader with the custom cat and dog dataset, with optional data data
+    augmentation applied.
+    """
 
-    # Define the data transformation
-    transform_composition = transforms.Compose(
-        [
-            transforms.Resize((224, 224)),
+    def __init__(
+        self, img_size: Tuple[int, int] = (224, 224), batch_size: int = 32
+    ):
+        self.img_size = img_size
+        self.batch_size = batch_size
+
+    def build(self, data_augmentation=None):
+        """
+        Apply the optional data augmentation transforms if they exist and return the
+        dataloader.
+        """
+        # Sub-sample images from the source folders
+        # subsample_images(SOURCE_FOLDER_1)
+        # subsample_images(SOURCE_FOLDER_2)
+
+        # Define the data transformation
+
+        base_transforms = [
+            transforms.Resize(self.img_size),
             transforms.ToTensor(),
             transforms.Normalize(
                 mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
             ),
+            transforms.RandomGrayscale(p=0.5),
+            transforms.RandomHorizontalFlip(p=0.5),
         ]
-    )
 
-    # Create the dataset and dataloader
-    dataset = ImageDataset(DESTINATION_FOLDER, transform=transform_composition)
-    dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+        transform_composition = transforms.Compose(
+            data_augmentation  # + base_transforms
+            if data_augmentation
+            else base_transforms
+        )
 
-    # Print dataset information
-    print("Combined dataset created successfully!")
-    print("Non-combined datasets deleted.")
-    print(f"Dataset size: {len(dataset)}")
-    print(f"Number of batches: {len(dataloader)}")
-    print(f"Number of files in the dataset: {count_files(DESTINATION_FOLDER)}")
+        # Create the dataset and dataloader
+        dataset = ImageDataset(
+            DESTINATION_FOLDER, transform=transform_composition
+        )
+        dataloader = DataLoader(
+            dataset, batch_size=self.batch_size, shuffle=True, num_workers=0
+        )
+        return dataloader
