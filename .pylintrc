@@ -1,5 +1,6 @@
 [MESSAGES CONRTOL]
 disable=
+    W,
     too-few-public-methods,
     fixme,
     too-many-arguments,

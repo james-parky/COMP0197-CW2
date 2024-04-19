@@ -201,18 +201,11 @@ class UnsupervisedLoader:
         base_transforms = [
             transforms.Resize(self.img_size),
             transforms.ToTensor(),
-            transforms.Normalize(
-                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-            ),
-            transforms.RandomGrayscale(p=0.5),
-            transforms.RandomHorizontalFlip(p=0.5),
+            # transforms.RandomGrayscale(p=0.5),
+            # transforms.RandomHorizontalFlip(p=0.5),
         ]
 
-        transform_composition = transforms.Compose(
-            data_augmentation  # + base_transforms
-            if data_augmentation
-            else base_transforms
-        )
+        transform_composition = transforms.Compose(data_augmentation)
 
         # Create the dataset and dataloader
         dataset = ImageDataset(

@@ -23,6 +23,8 @@ from lightly.transforms.simclr_transform import (  # pylint: disable=import-erro
 # )
 from unsupervised_loader import UnsupervisedLoader
 
+from torchvision import transforms  # pylint: disable=import-error
+
 
 class SimCLR(nn.Module):
     """
@@ -60,7 +62,14 @@ def train_simclr(model, num_epochs: int = 10):
     # dataset = LightlyDataset("path/to/folder", transform=transform)
 
     dataloader = UnsupervisedLoader(img_size=(64, 64), batch_size=32).build(
-        data_augmentation=[SimCLRTransform(input_size=32, gaussian_blur=0.0)]
+        data_augmentation=[
+            SimCLRTransform(input_size=32, gaussian_blur=0.0),
+            # transforms.Resize((64,64)),
+            # transforms.ToTensor(),
+            # transforms.Normalize(
+            # mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+            # ),
+        ]
     )
 
     criterion = NTXentLoss()
@@ -137,38 +146,54 @@ def train_simclr(model, num_epochs: int = 10):
     # print(f"F1 Score: {f1:.4f}")
 
 
-class MaskedAutoencoder:
-    """
-    Class implementation of a masked autoencoder self-supervised model.
-    """
+simclr_model = SimCLR(
+    nn.Sequential(*list(torchvision.models.resnet18().children())[:-1])
+)
 
 
-def get_model(model: str = "autoencoder"):
+train_simclr(simclr_model, num_epochs=1)
+
+
+def init_loader(data, size=20, work=8):
     """
-    Return a model and accompanying training function.
+    Initialises DataLoaders for training and testing purposes.
+    :param size: The desired batch size to use, by default this is set as 20.
+    :param work: The number of workers to use, by default this is set to be 8.
     """
-    return (
-        (MaskedAutoencoder(), None)
-        if model == "autoencoder"
-        else (
-            SimCLR(
-                nn.Sequential(
-                    *list(torchvision.models.resnet18().children())[:-1]
-                )
-            ),
-            train_simclr,
-        )
+    trainloader = torch.utils.data.DataLoader(
+        data.get_train(),
+        batch_size=size,
+        shuffle=True,
+        num_workers=work,
     )
+    testloader = torch.utils.data.DataLoader(
+        data.get_test(),
+        batch_size=size,
+        shuffle=True,
+        num_workers=work,
+    )
+    return trainloader
 
 
-simclr_model, train = get_model("simclr")
+from oxford_data import OxfordData
 
-if train is not None:
-    train(simclr_model, num_epochs=1)
+data = OxfordData()
+trainloader = init_loader(data)
+criterion = torch.nn.CrossEntropyLoss()
+optimiser = torch.optim.Adam(
+    simclr_model.parameters(), lr=0.001, weight_decay=0.01
+)
+for epoch in range(1):
+    print(f"\n[EPOCH {epoch+1}]")
+    for i, d in enumerate(trainloader):
+        print(i)
+        # print(f"Batch: {i}")
+        inputs, labels = d
 
-
-# resnet = torchvision.models.resnet18()
-# backbone = nn.Sequential(*list(resnet.children())[:-1])
-# model = SimCLR(backbone)
-#
-#
+        optimiser.zero_grad()
+        outputs = simclr_model(inputs)
+        loss = criterion(outputs, labels.to(dtype=torch.long))
+        loss.backward()
+        optimiser.step()
+        # test()
+print("\n\nTraining complete")
