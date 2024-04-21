@@ -76,9 +76,10 @@ if __name__ == "__main__":
             0.06,
             finetune_split,
         ]
+
         sim_clr_eval_args = sim_clr_finetune_args
         sim_clr_train(sim_clr_model, *sim_clr_pretain_args)
-        fine_tune(sim_clr_model, device, *sim_clr_finetune_args)
+        fine_tune(sim_clr_model, *sim_clr_finetune_args)
         evaluate(sim_clr_model, *sim_clr_eval_args)
 
         vit_mae_model = ViTMAEForPreTraining(VIT_MAE_CONFIG)
@@ -99,11 +100,11 @@ if __name__ == "__main__":
         vit_mae_eval_args = vit_mae_pretrain_args
         vit_mae_train(vit_mae_model, *vit_mae_pretrain_args)
         vit_mae_model = SegmentationModel(vit_mae_model).to(device)
-        fine_tune(vit_mae_model, device, *vit_mae_finetune_args)
+        fine_tune(vit_mae_model, *vit_mae_finetune_args)
         evaluate(vit_mae_model, *vit_mae_eval_args)
 
         unet_model = UNet().to(device)
         unet_train_args = [device, Compose(ts + finetune_transforms), 10, 1e-4]
         unet_eval_args = unet_train_args
-        fine_tune(unet_model, *unet_train_args)
+        unet_train(unet_model, *unet_train_args)
         evaluate(unet_model, *unet_eval_args)

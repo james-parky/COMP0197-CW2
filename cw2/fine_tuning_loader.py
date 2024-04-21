@@ -44,9 +44,10 @@ class FineTuningLoader:
             transform=ts,
             target_transform=target_transform,
         )
-        finetune_dataset = random_split(
-            dataset, [split * len(dataset), 1 - (split * len(dataset))]
-        )
+
+        lower = int(split * len(dataset))
+        upper = len(dataset) - lower
+        finetune_dataset, _ = random_split(dataset, [lower, upper])
 
         return DataLoader(
             finetune_dataset,

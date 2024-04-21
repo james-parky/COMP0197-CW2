@@ -32,9 +32,10 @@ def unet_train(
     model.train()
 
     dataloader = FineTuningLoader(batch_size=32, num_workers=4).build(
-        ts, split=1.0, path="fintune"
+        ts, split=1.0, path="finetune"
     )
-    criterion = nn.CrossEntropyLoss()
+
+    criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     print("Starting UNet Training...")

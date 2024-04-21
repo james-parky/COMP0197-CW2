@@ -45,8 +45,8 @@ def fine_tune(model, device, ts, num_epochs, learning_rate, split) -> None:
                 print(
                     (
                         f"[Epoch {epoch + 1}/{num_epochs},"
-                        f"Batch {i + 1}/{len(dataloader)}]:"
-                        f"Loss = {loss.item():.5f}"
+                        f" Batch {i + 1}/{len(dataloader)}]:"
+                        f" Loss = {loss.item():.5f}"
                     )
                 )
 
