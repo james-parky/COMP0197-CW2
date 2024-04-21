@@ -6,6 +6,8 @@ from transformers import ViTMAEForPreTraining
 from vit_mae_model import VIT_MAE_CONFIG, SegmentationModel
 from sim_clr_train import sim_clr_train
 from vit_mae_train import vit_mae_train
+from unet_model import UNet
+from unet_train import unet_train
 from fine_tune import fine_tune
 from torchvision.transforms import (
     Compose,
@@ -99,3 +101,9 @@ if __name__ == "__main__":
         vit_mae_model = SegmentationModel(vit_mae_model).to(device)
         fine_tune(vit_mae_model, device, *vit_mae_finetune_args)
         evaluate(vit_mae_model, *vit_mae_eval_args)
+
+        unet_model = UNet().to(device)
+        unet_train_args = [device, Compose(ts + finetune_transforms), 10, 1e-4]
+        unet_eval_args = unet_train_args
+        fine_tune(unet_model, *unet_train_args)
+        evaluate(unet_model, *unet_eval_args)

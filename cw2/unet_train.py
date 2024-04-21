@@ -1,26 +1,27 @@
 """ 
-Module for the pre-training of the SimCLR model.
+Module for the fully supervised training of the UNet model.
 """
-import torch
-from sim_clr_model import SimCLR
-from pre_training_loader import PreTrainingLoader
-from lightly.loss import NTXentLoss
+from unet_model import UNet
 from typing import Any
+from fine_tune import FineTuningLoader
+from torch import nn
+from label_segmentations import label_segmentations
+import torch
 
 
-def sim_clr_train(
-    model: SimCLR,
+def unet_train(
+    model: UNet,
     device: str,
     ts: list[Any],
     num_epochs: int = 10,
     learning_rate: float = 0.06,
 ) -> None:
     """
-    Train the SimCLR model using the pre-training dataset, with some optional transforms
+    Train the UNet model using the pre-training dataset, with some optional transforms
     applied.
 
     Args:
-        model (SimCLR): The SimCLR model to be trained.
+        model (UNet): The UNet model to be trained.
         device (str): The current torch device string.
         ts (list[Any]): A list of the transforms to be applied.
         num_epochs (int): The number of epochs to train over.
@@ -30,22 +31,23 @@ def sim_clr_train(
     model.to(device)
     model.train()
 
-    dataloader = PreTrainingLoader(batch_size=32, num_workers=4).build(ts)
-    criterion = NTXentLoss()
+    dataloader = FineTuningLoader(batch_size=32, num_workers=4).build(
+        ts, split=1.0, path="fintune"
+    )
+    criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-    print("Starting SimCLR Training...")
+    print("Starting UNet Training...")
     for epoch in range(num_epochs):
         total_loss = 0.0
 
-        for i, batch in enumerate(dataloader):
-            x0, x1 = batch[0]
-            x0 = x0.to(device)
-            x1 = x1.to(device)
-            z0 = model(x0, return_embeddings=True)
-            z1 = model(x1, return_embeddings=True)
+        for i, (images, masks) in enumerate(dataloader):
+            images = images.to(device)
+            masks = masks.to(device)
+            outputs = model(images)
+            masks = label_segmentations(masks)
 
-            loss = criterion(z0, z1)
+            loss = criterion(outputs, masks)
             total_loss += loss.detach()
             loss.backward()
             optimizer.step()
