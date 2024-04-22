@@ -1,0 +1,45 @@
+[]
+pre train (e1 avg loss / e10 avg loss / eval loss / eval accuracy)
+fine tune (e1 avg loss / e10 avg loss / eval loss / eval accuracy)
+
+SimCLR: 4.06113 / 3.71404 / 0.65751 / 0.71116
+	0.82915 / 0.59570 / 0.60159 / 0.71156
+ViT: 0.86390 / 0.72615 / 0.71700 / 0.71179
+     0.60885 / 0.58911 / 0.58683 / 0.71163
+Unet: NA / NA / NA / NA 
+      0.47263 / 0.19682 / 0.25448 / 0.71148 
+
+[Flip]
+pre train (e1 avg loss / e10 avg loss / eval loss / eval accuracy)
+fine tune (e1 avg loss / e10 avg loss / eval loss / eval accuracy)
+
+SimCLR: 4.11923 / 3.71533 / 0.73513 / 0.71238
+        0.91526 / 0.57533 / 0.57269 / 0.71200
+ViT: 0.86375 / 0.76404 / 0.66078 / 0.71393
+     0.60244 / 0.59668 / 0.59694 / 0.71297
+Unet: NA / NA / NA / NA 
+      0.56796 / 0.35745 / 0.39424 / 0.71117
+
+
+[Grey]
+pre train (e1 avg loss / e10 avg loss / eval loss / eval accuracy)
+fine tune (e1 avg loss / e10 avg loss / eval loss / eval accuracy)
+
+SimCLR: 4.04629 / 3.70286 / 0.71314 / 0.71318
+        0.88103 / 0.50048 / 0.50131 / 0.71384
+ViT: 0.94290 / 0.90782 / 0.86811 / 0.71181
+     0.60669 / 0.59315 / 0.59071 / 0.71370
+Unet: NA / NA / NA / NA
+      0.50554 / 0.22544 / 0.31584 / 0.71377
+
+
+[Both]
+pre train (e1 avg loss / e10 avg loss / eval loss / eval accuracy)
+fine tune (e1 avg loss / e10 avg loss / eval loss / eval accuracy)
+
+SimCLR: 4.05704 / 3.70389 / 0.65191 / 0.71169
+        0.61277 / 0.49591 / 0.51891 / 0.71266
+ViT: 0.94389 / 0.94221 / 0.66386 / 0.71344
+     0.60204 / 0.59241 / 0.59196 / 0.71044
+Unet: NA / NA / NA / NA
+      0.49707 / 0.36412 / 0.39300 / 0.71351
