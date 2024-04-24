@@ -6,7 +6,7 @@ Module Imports
 import torch as tc
 from torch import nn
 import torchvision as tv
-from oxford_data import OxfordData
+from data_container import DataContainer
 
 
 class SimpleResnetModel:
@@ -16,13 +16,15 @@ class SimpleResnetModel:
     ----------------
     """
 
-    def __init__(self):
+    def __init__(self, dataset="oxford"):
         """
         Initialises the model parameters, calling all other init functions in the process.
 
+        :param dataset: A string value representing which dataset the internal DataContainer
+                        will hold, and the model will be trained on.
         :return: 'None'; nothing is returned.
         """
-        self.data = OxfordData()
+        self.data = DataContainer(dataset=dataset)
         self.init_loader()
         self.init_device()
         self.init_net()
@@ -73,8 +75,7 @@ class SimpleResnetModel:
         :return: 'None'; nothing is returned.
         """
         self.net = tv.models.resnet18(weights=None)
-        num_ftrs = self.net.fc.in_features
-        self.net.fc = nn.Linear(num_ftrs, 37)
+        self.change_classification(37)
 
     def save_model(self):
         """
@@ -82,10 +83,10 @@ class SimpleResnetModel:
 
         :return: 'None'; nothing is returned.
         """
-        tc.save(self.net.state_dict(), "saved_simple_model.pt")
+        tc.save(self.net.state_dict(), "saved_pretuned_model_halffreeze.pt")
         print("Model saved")
 
-    def load_model(self, name="saved_simple_model.pt"):
+    def load_model(self, name="saved_simple_model_cifar.pt"):
         """
         Defines a new model with loaded parameters.
 
@@ -96,6 +97,31 @@ class SimpleResnetModel:
         self.net.load_state_dict(tc.load(name))
         self.net.to(self.device)
         print("Model loaded")
+
+    def change_classification(self, num_classes):
+        """
+        Changes the number of classes to infer from in the final classification layer.
+
+        :param num_classes: An integer indicating the number of classes in the dataset.
+        :return: 'None'; nothing is returned.
+        """
+        num_ftrs = self.net.fc.in_features
+        self.net.fc = nn.Linear(num_ftrs, num_classes)
+        self.net.to(self.device)
+
+    def freeze_layers(self, cutoff=3):
+        """
+        Freezes all layers before the 'cutoff' layer.
+        The fully connected classification layer is unable to be frozen.
+
+        :param cutoff: An integer representing the cutoff up to which layers will be frozen.
+                       By default, this is set as 4 to unfreeze only the final ResNet layer.
+        :return: 'None'; nothing is returned.
+        """
+        for name, param in self.net.named_parameters():
+            if f"layer{cutoff}" in name or "fc" in name:
+                break
+            param.requires_grad = False
 
     # ----------------
     # Model Training
@@ -136,7 +162,7 @@ class SimpleResnetModel:
         """
         total = correct = 0
         print("\n[TEST]")
-        for data in enumerate(self.testloader):
+        for _, data in enumerate(self.testloader):
             # print(f"Batch: {i}")
             inputs, labels = data
             inputs, labels = inputs.to(self.device), labels.to(self.device)
@@ -168,10 +194,15 @@ def main():
 
     :return: 'None'; nothing is returned.
     """
-    model = SimpleResnetModel()
-    model.train()
-    model.load_model()
-    model.test()
+    # cifar_model = SimpleResnetModel("cifar")
+    oxford_model = SimpleResnetModel()
+
+    oxford_model.load_model()
+    oxford_model.change_classification(37)
+    oxford_model.freeze_layers()
+    oxford_model.train()
+    oxford_model.load_model()
+    oxford_model.test()
 
 
 if __name__ == "__main__":

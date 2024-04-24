@@ -9,17 +9,20 @@ import torch as tc
 import torchvision
 
 
-class OxfordData:
+class DataContainer:
     """
-    OxfordData class for downloading the Oxford-IIIT Pet dataset and storing it for use.
+    DataContainer class for either CIFAR-10 or Oxford-IIIT Pet datasets.
+    This class downloads and stores them, providing some utility functions for use.
     """
 
-    def __init__(self, root="../data/oxford_pets", transform=None):
+    def __init__(self, root="../data", dataset="oxford", transform=None):
         """
-        Initialises OxfordData object.
+        Initialises DataContainer object.
 
         :param root: String representing the root data folder, by default this
                      is '/data' in top level of '/src' (when called from the 'supervised' folder).
+        :param dataset: String representing which of the datasets to use, by default this is
+                        'oxford', but can also take the value 'cifar'.
         :param transform: torchvision.transforms object defining transforms to
                           be performed on data upon download, by default this is 'None'.
         :return: 'None'; nothing is returned.
@@ -27,6 +30,8 @@ class OxfordData:
         # Prevent certificate verification error when downloading Torchvision datasets
         ssl._create_default_https_context = ssl._create_unverified_context
 
+        self.dataset = dataset
+        self.root = root + "/" + dataset
         self.root = root.replace("/", os.path.sep)
         self.trainroot = os.path.join(self.root, "train")
         self.testroot = os.path.join(self.root, "test")
@@ -47,22 +52,39 @@ class OxfordData:
 
     def ingest_data(self):
         """
-        Downloads the Oxford-IIIT Pet dataset into the object's pre-defined root folder.
+        Downloads the dataset specified by 'self.dataset' into the object's
+        pre-defined root folder.
 
         :return: 'None'; nothing is returned.
         """
-        self.train = torchvision.datasets.OxfordIIITPet(
-            root=self.trainroot,
-            split="trainval",
-            transform=self.transform,
-            download=True,
-        )
-        self.test = torchvision.datasets.OxfordIIITPet(
-            root=self.testroot,
-            split="test",
-            transform=self.transform,
-            download=True,
-        )
+        if self.dataset == "cifar":
+            self.train = torchvision.datasets.CIFAR10(
+                root=self.trainroot,
+                train=True,
+                transform=self.transform,
+                download=True,
+            )
+            self.test = torchvision.datasets.CIFAR10(
+                root=self.testroot,
+                train=False,
+                transform=self.transform,
+                download=True,
+            )
+        else:
+            self.train = torchvision.datasets.OxfordIIITPet(
+                root=self.trainroot,
+                split="trainval",
+                transform=self.transform,
+                download=True,
+            )
+            self.test = torchvision.datasets.OxfordIIITPet(
+                root=self.testroot,
+                split="test",
+                transform=self.transform,
+                download=True,
+            )
+
+        print(f"Successfully Downloaded: {self.dataset}")
 
     def get_train(self):
         """
@@ -72,7 +94,7 @@ class OxfordData:
         """
         if self.train:
             return self.train
-        raise ValueError("OxfordData: No training data to return.")
+        raise ValueError("DatasetContainer: No training data to return.")
 
     def get_test(self):
         """
@@ -82,7 +104,7 @@ class OxfordData:
         """
         if self.test:
             return self.test
-        raise ValueError("OxfordData: No test data to return.")
+        raise ValueError("DatasetContainer: No test data to return.")
 
     def get_subset(self, subset, size):
         """
